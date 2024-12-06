@@ -22,26 +22,45 @@ public class CompraController {
 
     // Endpoint para registrar una compra
     @PostMapping("/add")
-    public ResponseEntity<String> addCompra(@Valid @RequestBody Compra compra) {
+    public ResponseEntity<Map<String, Object>> addCompra(@Valid @RequestBody Compra compra) {
         Compra savedCompra = compraService.saveCompra(compra);
-        return ResponseEntity.ok("Compra registrada correctamente con ID: " + savedCompra.getId());
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Compra registrada correctamente.");
+        response.put("compra", savedCompra);
+
+        return ResponseEntity.ok(response);
     }
 
     // Endpoint para obtener el historial de compras de un usuario
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<Map<String, Object>> getComprasByUserId(@PathVariable Long userId) {
-        List<Compra> compras = compraService.getComprasByUserId(userId);
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<Map<String, Object>> getComprasByUsuarioId(@PathVariable Long usuarioId) {
+        List<Compra> compras = compraService.findByUsuarioId(usuarioId);
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Se encontraron " + compras.size() + " compras.");
+        response.put("message", "Se encontraron " + compras.size() + " compras para el usuario con ID: " + usuarioId);
         response.put("compras", compras);
 
         return ResponseEntity.ok(response);
     }
 
-    // Endpoint para eliminar una compra
+    // Endpoint para eliminar una compra por su ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCompra(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteCompra(@PathVariable Long id) {
         compraService.deleteCompra(id);
-        return ResponseEntity.ok("Compra eliminada correctamente con ID: " + id);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Compra eliminada correctamente.");
+        response.put("compraId", String.valueOf(id));
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Endpoint para obtener todas las compras
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getAllCompras() {
+        List<Compra> compras = compraService.getAllCompras();
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Se encontraron " + compras.size() + " compras en total.");
+        response.put("compras", compras);
+
+        return ResponseEntity.ok(response);
     }
 }

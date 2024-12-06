@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CompraServiceImpl implements CompraService {
@@ -19,12 +20,53 @@ public class CompraServiceImpl implements CompraService {
     }
 
     @Override
-    public List<Compra> getComprasByUserId(Long userId) {
-        return compraRepository.findByUsuarioId(userId);
+    public Optional<Compra> findById(Long id) {
+        return compraRepository.findById(id);
     }
 
     @Override
     public void deleteCompra(Long id) {
         compraRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<Compra> updateCompra(Long id, Compra updatedCompra) {
+        Optional<Compra> existingCompra = compraRepository.findById(id);
+        if (existingCompra.isPresent()) {
+            Compra compra = existingCompra.get();
+
+            // Validación para evitar sobrescribir con nulos
+            if (updatedCompra.getUsuario() != null) {
+                compra.setUsuario(updatedCompra.getUsuario());
+            }
+            if (updatedCompra.getProducto() != null) {
+                compra.setProducto(updatedCompra.getProducto());
+            }
+            if (updatedCompra.getCantidad() != null) {
+                compra.setCantidad(updatedCompra.getCantidad());
+            }
+            if (updatedCompra.getFechaCompra() != null) {
+                compra.setFechaCompra(updatedCompra.getFechaCompra());
+            }
+            return Optional.of(compraRepository.save(compra));
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Compra> findByUsuarioId(Long usuarioId) {
+        return compraRepository.findByUsuarioId(usuarioId);
+    }
+
+    @Override
+    public List<Compra> findByProductoId(Long productId) {
+        // Necesitamos implementar este método en CompraRepository
+        // Asumiendo que existe una consulta `findByProductoId` definida
+        return compraRepository.findByProductoId(productId);
+    }
+
+    @Override
+    public List<Compra> getAllCompras() {
+        return compraRepository.findAll();
     }
 }
