@@ -32,4 +32,6 @@ public interface UserService {
     
     // Método para actualizar la contraseña de un usuario
     boolean updatePassword(String email, String newPassword);
+
+    
 }
