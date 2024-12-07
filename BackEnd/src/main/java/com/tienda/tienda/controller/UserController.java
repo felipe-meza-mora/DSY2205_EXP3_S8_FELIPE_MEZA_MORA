@@ -22,12 +22,33 @@ public class UserController {
     private UserService userService;
 
     // Endpoint para registrar un usuario
+    public boolean containsSQLInjection(String value) {
+        // Lista de palabras clave comunes en inyecciones SQL
+        String[] sqlInjectionKeywords = {"DROP", "DELETE", "INSERT", "UPDATE", "--", ";", "/*", "*/"};
+        
+        // Verifica si el valor contiene alguna palabra clave
+        for (String keyword : sqlInjectionKeywords) {
+            if (value != null && value.toUpperCase().contains(keyword)) {
+                return true; // Si se encuentra una palabra clave, es una inyección SQL
+            }
+        }
+        return false; // Si no se encuentran palabras clave, no es una inyección SQL
+    }
+    
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@Valid @RequestBody User user) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody User user) {
+        // Validación rápida de inyecciones SQL en los campos relevantes
+        if (containsSQLInjection(user.getCorreo()) || containsSQLInjection(user.getTelefono()) || containsSQLInjection(user.getDireccionEnvio())) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error: Datos no válidos.");
+            return ResponseEntity.badRequest().body(errorResponse); // Devuelve un error si se detecta inyección SQL
+        }
+    
+        // Si no hay inyecciones SQL, guarda el usuario
         User savedUser = userService.saveUser(user);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Usuario añadido correctamente: " + savedUser.getNombre());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response); // Devuelve una respuesta exitosa
     }
 
     // Endpoint para obtener el usuario por id

@@ -1,3 +1,4 @@
+
 package com.tienda.tienda.model;
 
 import jakarta.persistence.*;

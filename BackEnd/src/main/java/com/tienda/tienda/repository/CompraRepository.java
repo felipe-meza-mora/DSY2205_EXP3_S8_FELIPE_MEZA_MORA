@@ -10,4 +10,5 @@ import java.util.List;
 public interface CompraRepository extends JpaRepository<Compra, Long> {
     List<Compra> findByUsuarioId(Long userId);
     List<Compra> findByProductoId(Long productId);
+    
 }

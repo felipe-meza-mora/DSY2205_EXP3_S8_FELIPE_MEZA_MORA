@@ -6,6 +6,7 @@ import com.tienda.tienda.service.ProductService;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,7 +41,7 @@ public class ProductController {
             return ResponseEntity.ok(response);
         } else {
             response.put("message", "Producto no encontrado");
-            return ResponseEntity.status(404).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); // Asegúrate de usar HttpStatus.NOT_FOUND
         }
     }
 
@@ -57,11 +58,22 @@ public class ProductController {
 
     // Endpoint para actualizar un producto
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateProduct(@PathVariable Long id, @Valid @RequestBody Product updatedProduct) {
+    public ResponseEntity<Map<String, Object>> updateProduct(@PathVariable Long id, @Valid @RequestBody Product updatedProduct) {
         Optional<Product> product = productService.updateProduct(id, updatedProduct);
-        return product.map(p -> ResponseEntity.ok("Producto actualizado correctamente: " + p.getNombre()))
-                      .orElseGet(() -> ResponseEntity.status(404).body("Producto no encontrado para actualización"));
+
+        return product.map(p -> {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Producto actualizado correctamente");
+            response.put("product", p);
+            return ResponseEntity.ok(response);
+        })
+        .orElseGet(() -> {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Producto no encontrado para actualización");
+            return ResponseEntity.status(404).body(response);
+        });
     }
+    
 
     // Endpoint para eliminar un producto
     @DeleteMapping("/{id}")

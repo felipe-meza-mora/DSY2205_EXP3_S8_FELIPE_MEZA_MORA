@@ -15,4 +15,5 @@ public interface ProductService {
     void deleteProduct(Long id);
     // Método para actualizar un producto
     Optional<Product> updateProduct(Long id, Product updatedProduct);
+    Product findById(Long id);
 }

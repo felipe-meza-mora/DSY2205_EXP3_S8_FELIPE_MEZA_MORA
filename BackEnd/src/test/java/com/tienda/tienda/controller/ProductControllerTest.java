@@ -98,23 +98,39 @@ class ProductControllerTest {
 
     @Test
     void testUpdateProduct() {
+        // Crear el producto actualizado
         Product updatedProduct = new Product();
         updatedProduct.setNombre("Producto Actualizado");
         updatedProduct.setPrecio(120.0);
 
+        // Crear el producto existente
         Product existingProduct = new Product();
         existingProduct.setId(1L);
         existingProduct.setNombre("Producto Existente");
         existingProduct.setPrecio(100.0);
 
+        // Simula la respuesta del servicio
         when(productService.updateProduct(eq(1L), any(Product.class))).thenReturn(Optional.of(updatedProduct));
 
-        ResponseEntity<String> response = productController.updateProduct(1L, updatedProduct);
+        // Llamada al controlador
+        ResponseEntity<Map<String, Object>> response = productController.updateProduct(1L, updatedProduct);
 
+        // Verifica que el código de respuesta sea 200 OK
         assertEquals(200, response.getStatusCode().value());
-        assertEquals("Producto actualizado correctamente: Producto Actualizado", response.getBody());
+
+        // Verifica que el mensaje sea el esperado
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Producto actualizado correctamente", responseBody.get("message"));
+
+        // Verifica que el producto actualizado esté en el cuerpo de la respuesta
+        Product productInResponse = (Product) responseBody.get("product");
+        assertNotNull(productInResponse);
+        assertEquals("Producto Actualizado", productInResponse.getNombre());
+        assertEquals(120.0, productInResponse.getPrecio());
     }
-    
+
+
     @SuppressWarnings("null")
     @Test
     void testDeleteProduct() {
@@ -152,16 +168,24 @@ class ProductControllerTest {
 
     @Test
     void testUpdateProductNotFound() {
+        // Crear el producto actualizado
         Product updatedProduct = new Product();
         updatedProduct.setNombre("Nuevo Producto");
         updatedProduct.setPrecio(100.0);
 
-        when(productService.updateProduct(999L, updatedProduct)).thenReturn(Optional.empty()); // Producto no encontrado
+        // Simula que el producto con ID 999 no se encuentra
+        when(productService.updateProduct(eq(999L), any(Product.class))).thenReturn(Optional.empty()); // Producto no encontrado
 
-        ResponseEntity<String> response = productController.updateProduct(999L, updatedProduct);
+        // Llamada al controlador
+        ResponseEntity<Map<String, Object>> response = productController.updateProduct(999L, updatedProduct);
 
+        // Verifica que el código de respuesta sea 404 Not Found
         assertEquals(404, response.getStatusCode().value());
-        assertEquals("Producto no encontrado para actualización", response.getBody());
+
+        // Verifica que el mensaje sea el esperado
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Producto no encontrado para actualización", responseBody.get("message"));
     }
 
     @Test
