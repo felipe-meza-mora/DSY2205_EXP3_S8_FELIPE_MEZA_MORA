@@ -92,7 +92,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(private productService: ProductService, private router: Router,private formBuilder: FormBuilder) {
     this.productForm = this.formBuilder.group({
-      id: ['', [Validators.required]],
       nombre: ['', Validators.required],
       descripcion: ['', Validators.required],
       precio: [0, [Validators.required, Validators.min(0)]],
@@ -224,29 +223,27 @@ export class HomeComponent implements OnInit, OnDestroy {
   addProduct(): void {
     if (this.productForm.valid) {
       const newProduct: Product = this.productForm.value;
-      this.productService.checkProductIdExists(newProduct.id).subscribe({
-        next: (exists) => {
-          if (exists) {
-            this.errorMessage = 'El ID del producto ya existe. Por favor, elija otro ID.';
-          } else {
-            this.productService.addProduct(newProduct).subscribe({
-              next: () => {
-                console.log('Producto agregado con éxito');
-                this.productForm.reset();
-                this.errorMessage = '';
-                const modalElement = document.getElementById('productModal');
-                const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                modalInstance.hide();
-                this.showToast('Producto agregado con éxito');
-              },
-              error: (error) => {
-                console.error('Error al agregar producto: ', error);
-              }
-            });
-          }
+      
+      // Llamada al servicio para agregar el producto
+      this.productService.addProduct(newProduct).subscribe({
+        next: (response) => {
+          console.log('Producto agregado con éxito');
+          this.productForm.reset();
+          this.errorMessage = '';
+          
+          // Recargar los productos después de agregar uno nuevo
+          this.loadProducts();
+  
+          // Cerrar el modal
+          const modalElement = document.getElementById('productModal');
+          const modalInstance = bootstrap.Modal.getInstance(modalElement);
+          modalInstance.hide();
+  
+          // Mostrar un mensaje de confirmación
+          this.showToast('Producto agregado con éxito');
         },
         error: (error) => {
-          console.error('Error al verificar ID del producto: ', error);
+          console.error('Error al agregar producto: ', error);
         }
       });
     }
@@ -287,10 +284,10 @@ export class HomeComponent implements OnInit, OnDestroy {
         next: () => {
           console.log('Producto eliminado con éxito');
           this.showToast(`${this.selectedProduct?.nombre} ha sido eliminado.`);
-          this.loadProducts();
+          this.loadProducts();  // Recargar los productos después de eliminar uno
           const modalElement = document.getElementById('deleteProductModal');
           const modalInstance = bootstrap.Modal.getInstance(modalElement);
-          modalInstance.hide();
+          modalInstance.hide();  // Cerrar el modal después de eliminar el producto
         },
         error: (error: any) => {
           console.error('Error al eliminar el producto:', error);
@@ -347,19 +344,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     };
   
     if (this.selectedProduct?.id) {
-      this.productService.getProductById(this.selectedProduct.id).subscribe({
+      this.productService.updateProduct(this.selectedProduct.id, updatedProduct).subscribe({
         next: (response) => {
-          console.log('Producto encontrado:', response);
-          // Aquí puedes continuar con el flujo normal si el producto fue encontrado
+          console.log('Producto actualizado con éxito');
+          this.loadProducts(); // Aquí se recargan los productos después de la actualización
+  
+          // Cerrar el modal
+          const modalElement = document.getElementById('editProductModal');
+          const modalInstance = bootstrap.Modal.getInstance(modalElement);
+          modalInstance.hide();
+  
+          // Mostrar un mensaje de confirmación
+          this.showToast('Producto actualizado con éxito');
         },
         error: (error) => {
-          console.error('Error al verificar ID del producto:', error);
-          
-          if (error.status === 404) {
-            alert('Producto no encontrado');
-          } else {
-            alert('Hubo un problema al obtener el producto');
-          }
+          console.error('Error al actualizar el producto:', error);
         }
       });
     } else {

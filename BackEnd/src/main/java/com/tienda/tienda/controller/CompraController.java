@@ -1,10 +1,17 @@
 package com.tienda.tienda.controller;
 
 import com.tienda.tienda.model.Compra;
+import com.tienda.tienda.model.Product;
+import com.tienda.tienda.model.User;
 import com.tienda.tienda.service.CompraService;
+import com.tienda.tienda.service.ProductService;
+import com.tienda.tienda.service.UserService;
 
 import jakarta.validation.Valid;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,11 +26,28 @@ public class CompraController {
 
     @Autowired
     private CompraService compraService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ProductService productService;
 
     // Endpoint para registrar una compra
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addCompra(@Valid @RequestBody Compra compra) {
+        Optional<User> userOptional = userService.findById(compra.getUsuario().getId());
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Usuario no encontrado"));
+        }
+        compra.setUsuario(userOptional.get());
+
+        Optional<Product> productOptional = productService.getProductById(compra.getProducto().getId());
+        if (productOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Producto no encontrado"));
+        }
+        compra.setProducto(productOptional.get());
+
         Compra savedCompra = compraService.saveCompra(compra);
+        
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Compra registrada correctamente.");
         response.put("compra", savedCompra);
@@ -62,5 +86,18 @@ public class CompraController {
         response.put("compras", compras);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+     public ResponseEntity<Compra> updateCompra(@PathVariable Long id, @RequestBody Compra updateCompra) {
+        Optional<Compra> updatedCompra = compraService.updateCompra(id, updateCompra);
+        
+        if (updatedCompra.isPresent()) {
+            // Si la compra se actualizó con éxito, devolver la compra actualizada
+            return ResponseEntity.ok(updatedCompra.get());
+        } else {
+            // Si la compra no existe, devolver un error 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 }

@@ -38,7 +38,8 @@ class ProductControllerTest {
         product.setDescripcion("Descripción de prueba");
         product.setImagen("imagen.png");
     }
-
+    
+    @SuppressWarnings("null")
     @Test
     void testAddProduct() {
         Product newProduct = new Product();
@@ -47,12 +48,22 @@ class ProductControllerTest {
         newProduct.setDescripcion("Descripción del producto");
         newProduct.setImagen("nuevo_producto.png");
 
+        // Simula la llamada al servicio
         when(productService.saveProduct(any(Product.class))).thenReturn(newProduct);
 
-        ResponseEntity<String> response = productController.addProduct(newProduct);
+        // Llama al controlador y obtiene la respuesta
+        ResponseEntity<Map<String, Object>> response = productController.addProduct(newProduct);
 
+        // Verifica que el código de estado sea 200 OK
         assertEquals(200, response.getStatusCode().value());
-        assertEquals("Producto añadido correctamente: Producto Nuevo", response.getBody());
+
+        // Verifica que el mensaje de éxito sea el correcto
+        assertEquals("Producto añadido correctamente", response.getBody().get("message"));
+
+        // Verifica que el producto agregado sea el correcto
+        Product savedProduct = (Product) response.getBody().get("product");
+        assertNotNull(savedProduct);
+        assertEquals("Producto Nuevo", savedProduct.getNombre());
     }
     
     @SuppressWarnings("null")
@@ -134,18 +145,25 @@ class ProductControllerTest {
     @SuppressWarnings("null")
     @Test
     void testDeleteProduct() {
+        // Crear un producto de prueba
         Product product = new Product();
         product.setId(1L);
         product.setNombre("Producto a Eliminar");
 
+        // Configurar el mock para el servicio productService
         when(productService.getProductById(1L)).thenReturn(Optional.of(product));
 
-        ResponseEntity<String> response = productController.deleteProduct(1L);
+        // Llamar al endpoint deleteProduct
+        ResponseEntity<Map<String, String>> response = productController.deleteProduct(1L);
 
+        // Comprobar que el código de estado es 200 OK
         assertEquals(200, response.getStatusCode().value());
-        assertEquals("Producto eliminado correctamente: Producto a Eliminar", response.getBody());
-    }
 
+        // Comprobar que la respuesta contiene el mensaje esperado
+        assertEquals("Producto eliminado correctamente: Producto a Eliminar", response.getBody().get("message"));
+    }
+    
+    @SuppressWarnings("null")
     @Test
     void testGetProductByIdNotFound() {
         when(productService.getProductById(1L)).thenReturn(Optional.empty());
@@ -155,7 +173,8 @@ class ProductControllerTest {
         assertEquals(404, response.getStatusCode().value());
         assertEquals("Producto no encontrado", response.getBody().get("message"));
     }
-
+    
+    @SuppressWarnings("null")
     @Test
     void testGetAllProductsEmpty() {
         when(productService.getAllProducts()).thenReturn(new ArrayList<>());  // Lista vacía
@@ -187,29 +206,42 @@ class ProductControllerTest {
         assertNotNull(responseBody);
         assertEquals("Producto no encontrado para actualización", responseBody.get("message"));
     }
-
+    
+    @SuppressWarnings("null")
     @Test
     void testDeleteProductNotFound() {
-        when(productService.getProductById(999L)).thenReturn(Optional.empty()); // Producto no encontrado
+        // Mockeamos el servicio para devolver un Optional vacío, simulando que el producto no existe
+        when(productService.getProductById(999L)).thenReturn(Optional.empty());
 
-        ResponseEntity<String> response = productController.deleteProduct(999L);
+        // Llamamos al endpoint deleteProduct
+        ResponseEntity<Map<String, String>> response = productController.deleteProduct(999L);
 
+        // Comprobamos que el código de estado es 404 Not Found
         assertEquals(404, response.getStatusCode().value());
-        assertEquals("Producto no encontrado para eliminar", response.getBody());
-    }
 
+        // Comprobamos que la respuesta contiene el mensaje esperado
+        assertEquals("Producto no encontrado para eliminar", response.getBody().get("message"));
+    }
+    
+    @SuppressWarnings("null")
     @Test
     void testDeleteProductSuccess() {
+        // Creamos un producto de prueba
         Product product = new Product();
         product.setId(1L);
         product.setNombre("Producto A");
 
-        when(productService.getProductById(1L)).thenReturn(Optional.of(product)); // Producto encontrado
+        // Configuramos el mock para el servicio productService, simulando que el producto fue encontrado
+        when(productService.getProductById(1L)).thenReturn(Optional.of(product));
 
-        ResponseEntity<String> response = productController.deleteProduct(1L);
+        // Llamamos al endpoint deleteProduct
+        ResponseEntity<Map<String, String>> response = productController.deleteProduct(1L);
 
+        // Comprobamos que el código de estado es 200 OK
         assertEquals(200, response.getStatusCode().value());
-        assertEquals("Producto eliminado correctamente: Producto A", response.getBody());
+
+        // Comprobamos que la respuesta contiene el mensaje esperado
+        assertEquals("Producto eliminado correctamente: Producto A", response.getBody().get("message"));
     }
 
 }

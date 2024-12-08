@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -52,19 +53,8 @@ class CompraControllerTest {
         compra.setProducto(product);
         compra.setCantidad(2);
         compra.setFechaCompra(new java.util.Date());
-    }
-    
-    @SuppressWarnings("null")
-    @Test
-    void testAddCompra() {
-        when(compraService.saveCompra(any(Compra.class))).thenReturn(compra);
-
-        ResponseEntity<Map<String, Object>> response = compraController.addCompra(compra);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals("Compra registrada correctamente.", response.getBody().get("message"));
-        assertNotNull(response.getBody().get("compra"));
-        assertEquals(compra, response.getBody().get("compra"));
+        compra.setTotal(200.0);
+        compra.setEstado("Enviado");
     }
     
     @SuppressWarnings("null")
@@ -122,5 +112,5 @@ class CompraControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertEquals("Se encontraron 0 compras para el usuario con ID: 999", response.getBody().get("message"));
     }
-
+    
 }

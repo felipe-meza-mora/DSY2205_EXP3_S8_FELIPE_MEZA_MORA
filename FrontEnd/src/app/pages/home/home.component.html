@@ -95,14 +95,6 @@
             <div class="modal-body">
               <form [formGroup]="productForm" (ngSubmit)="addProduct()">
                 <div class="mb-3">
-                  <label for="id" class="form-label">ID</label>
-                  <input type="text" class="form-control" id="id" formControlName="id">
-                  <div *ngIf="productForm.get('id')?.invalid && (productForm.get('id')?.dirty || productForm.get('id')?.touched)" class="text-danger">
-                    <div *ngIf="productForm.get('id')?.errors?.['required']">ID es requerido.</div>
-                    <div *ngIf="productForm.get('id')?.errors?.['pattern']">ID no válido.</div>
-                  </div>
-                </div>
-                <div class="mb-3">
                   <label for="descripcion" class="form-label">Descripción</label>
                   <textarea type="text" class="form-control" id="descripcion" formControlName="descripcion"></textarea>
                   <div *ngIf="productForm.get('descripcion')?.invalid && (productForm.get('descripcion')?.dirty || productForm.get('descripcion')?.touched)" class="text-danger">
@@ -141,53 +133,52 @@
       </div>
 
       <!-- Modal para editar producto -->
-      <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="editProductModalLabel">Editar Producto</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <form  *ngIf="editProductForm"  [formGroup]="editProductForm" (ngSubmit)="updateProduct()">
-                <div class="mb-3">
-                  <label for="editDescripcion" class="form-label">Descripción</label>
-                  <textarea type="text" class="form-control" id="editDescripcion" formControlName="descripcion"></textarea>
-                  <div *ngIf="editProductForm.get('descripcion')?.invalid && (editProductForm.get('descripcion')?.dirty || editProductForm.get('descripcion')?.touched)" class="text-danger">
-                    <div *ngIf="editProductForm.get('descripcion')?.errors?.['required']">Descripción es requerida.</div>
-                  </div>
+    <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-inert="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editProductModalLabel">Editar Producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form *ngIf="editProductForm" [formGroup]="editProductForm" (ngSubmit)="updateProduct()">
+              <div class="mb-3">
+                <label for="editDescripcion" class="form-label">Descripción</label>
+                <textarea type="text" class="form-control" id="editDescripcion" formControlName="descripcion"></textarea>
+                <div *ngIf="editProductForm.get('descripcion')?.invalid && (editProductForm.get('descripcion')?.dirty || editProductForm.get('descripcion')?.touched)" class="text-danger">
+                  <div *ngIf="editProductForm.get('descripcion')?.errors?.['required']">Descripción es requerida.</div>
                 </div>
-                <div class="mb-3">
-                  <label for="editPrecio" class="form-label">Precio</label>
-                  <input type="number" class="form-control" id="editPrecio" formControlName="precio">
-                  <div *ngIf="editProductForm.get('precio')?.invalid && (editProductForm.get('precio')?.dirty || editProductForm.get('precio')?.touched)" class="text-danger">
-                    <div *ngIf="editProductForm.get('precio')?.errors?.['required']">Precio es requerido.</div>
-                    <div *ngIf="editProductForm.get('precio')?.errors?.['min']">El precio debe ser mayor que 0.</div>
-                  </div>
+              </div>
+              <div class="mb-3">
+                <label for="editPrecio" class="form-label">Precio</label>
+                <input type="number" class="form-control" id="editPrecio" formControlName="precio">
+                <div *ngIf="editProductForm.get('precio')?.invalid && (editProductForm.get('precio')?.dirty || editProductForm.get('precio')?.touched)" class="text-danger">
+                  <div *ngIf="editProductForm.get('precio')?.errors?.['required']">Precio es requerido.</div>
+                  <div *ngIf="editProductForm.get('precio')?.errors?.['min']">El precio debe ser mayor que 0.</div>
                 </div>
-                <div class="mb-3">
-                  <label for="editImagen" class="form-label">Imagen</label>
-                  <input type="text" class="form-control" id="editImagen" formControlName="imagen">
-                  <div *ngIf="editProductForm.get('imagen')?.invalid && (editProductForm.get('imagen')?.dirty || editProductForm.get('imagen')?.touched)" class="text-danger">
-                    <div *ngIf="editProductForm.get('imagen')?.errors?.['required']">Imagen URL es requerido.</div>
-                    <div *ngIf="editProductForm.get('imagen')?.errors?.['pattern']">URL no válida.</div>
-                  </div>
+              </div>
+              <div class="mb-3">
+                <label for="editImagen" class="form-label">Imagen</label>
+                <input type="text" class="form-control" id="editImagen" formControlName="imagen">
+                <div *ngIf="editProductForm.get('imagen')?.invalid && (editProductForm.get('imagen')?.dirty || editProductForm.get('imagen')?.touched)" class="text-danger">
+                  <div *ngIf="editProductForm.get('imagen')?.errors?.['required']">Imagen URL es requerido.</div>
+                  <div *ngIf="editProductForm.get('imagen')?.errors?.['pattern']">URL no válida.</div>
                 </div>
-                <div class="mb-3">
-                  <label for="editNombre" class="form-label">Nombre</label>
-                  <input type="text" class="form-control" id="editNombre" formControlName="nombre">
-                  <div *ngIf="editProductForm.get('nombre')?.invalid && (editProductForm.get('nombre')?.dirty || editProductForm.get('nombre')?.touched)" class="text-danger">
-                    <div *ngIf="editProductForm.get('nombre')?.errors?.['required']">Nombre es requerido.</div>
-                  </div>
+              </div>
+              <div class="mb-3">
+                <label for="editNombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="editNombre" formControlName="nombre">
+                <div *ngIf="editProductForm.get('nombre')?.invalid && (editProductForm.get('nombre')?.dirty || editProductForm.get('nombre')?.touched)" class="text-danger">
+                  <div *ngIf="editProductForm.get('nombre')?.errors?.['required']">Nombre es requerido.</div>
                 </div>
-                <button type="submit" class="btn btn-warning text-white" [disabled]="editProductForm.invalid">Actualizar Producto</button>
-                <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
-              </form>
-            </div>
+              </div>
+              <button type="submit" class="btn btn-warning text-white" [disabled]="editProductForm.invalid">Actualizar Producto</button>
+              <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+            </form>
           </div>
         </div>
       </div>
-            
+    </div>
 
 
        <!-- Modal para confirmación de eliminación -->

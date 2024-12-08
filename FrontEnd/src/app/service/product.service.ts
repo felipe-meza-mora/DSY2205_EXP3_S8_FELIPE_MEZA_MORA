@@ -22,7 +22,7 @@ export class ProductService {
 
   // Método para obtener un producto por ID
   getProductById(id: number): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
+    return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
     // ProductService (Asegúrate de que esta función esté en tu servicio)

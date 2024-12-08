@@ -77,12 +77,13 @@ export class UsersComponent implements OnInit {
    deleteUser(): void {
     if (this.selectedUser && this.selectedUser.id) {
       this.usersService.deleteUser(this.selectedUser.id)
-        .subscribe( // Cambia a `subscribe()` si `deleteUser()` devuelve un observable
+        .subscribe(
           () => {
             console.log('Usuario eliminado con éxito');
             this.showToast(`${this.selectedUser?.nombre} ha sido eliminado.`);
-            this.loadUsers();
-  
+            this.loadUsers(); // Recargamos los usuarios para reflejar el cambio
+
+            // Cerrar el modal después de la eliminación
             const modalElement = document.getElementById('deleteUserModal');
             if (modalElement) {
               const modalInstance = bootstrap.Modal.getInstance(modalElement);
@@ -104,22 +105,19 @@ export class UsersComponent implements OnInit {
     }
   }
 
-   /**
-   * Muestra un toast de Bootstrap con el mensaje proporcionado.
-   * @param message Mensaje a mostrar en el toast.
-   */
   private showToast(message: string): void {
     const toastElement = document.getElementById('liveToast');
     const toastBodyElement = document.getElementById('toast-body');
-
+  
     if (toastBodyElement) {
       toastBodyElement.innerText = message;
     }
-
+  
     if (toastElement) {
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
     }
   }
+
 
 }

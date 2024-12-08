@@ -41,6 +41,8 @@ export class PerfilComponent implements OnInit {
    * Inicializa el formulario de registro con validadores y carga los datos del usuario si están disponibles en el almacenamiento local.
    */
 
+  initialUserData: any;  // Para almacenar los datos iniciales
+
   ngOnInit(): void {
     this.formRegistro = this.fb.group({
       rut: ['', [Validators.required, validarRut]],
@@ -56,14 +58,12 @@ export class PerfilComponent implements OnInit {
     this.loadUserData();
   }
 
-  /**
-   * Método para cargar los datos del usuario actual en el formulario desde el almacenamiento local.
-   * Si los datos del usuario están disponibles, se establecen en el formulario de registro.
-   */
-
   loadUserData(): void {
     const user = JSON.parse(localStorage.getItem('sesionUsuario') || '{}');
     if (user) {
+      // Guardamos los datos iniciales
+      this.initialUserData = { ...user };
+
       this.formRegistro.patchValue({
         rut: user.rut,
         nombre: user.nombre,
@@ -72,10 +72,13 @@ export class PerfilComponent implements OnInit {
         permisos: user.permisos,
         direccionEnvio: user.direccionEnvio
       });
-      // El campo de la contraseña y confirmación se dejan en blanco por seguridad
     }
   }
 
+  hasChanges(): boolean {
+    // Compara los valores actuales con los valores iniciales
+    return JSON.stringify(this.formRegistro.value) !== JSON.stringify(this.initialUserData);
+  }
    /**
    * Validador personalizado para la contraseña que verifica la complejidad de la misma.
    * @param control Control de formulario que contiene el valor de la contraseña.
@@ -119,45 +122,32 @@ export class PerfilComponent implements OnInit {
    * Método para enviar el formulario de registro.
    * Si el formulario es válido, actualiza los datos del usuario en el almacenamiento local y muestra un mensaje de éxito antes de redirigir al usuario.
    */
+  
 
-  async submitForm(): Promise<void> {
-    if (this.formRegistro.valid) {
-      const formData = this.formRegistro.value;
-      const sesionUsuario: User = JSON.parse(localStorage.getItem('sesionUsuario') || '{}');
-      let currentPassword = sesionUsuario.password;
-
-      if (!formData.password) {
-        formData.password = currentPassword;
-      }
-      delete formData.confirmPassword;
-
-      try {
-        // Filtrar los campos undefined
-        const updatedUserData: Partial<User> = Object.fromEntries(
-          Object.entries(formData).filter(([_, v]) => v !== undefined)
-        ) as Partial<User>;
-
-        if (!updatedUserData.correo) {
-          throw new Error('Email is required to update user');
+    submitForm(): void {
+      if (this.formRegistro.valid) {
+        const formData = this.formRegistro.value;
+        const sesionUsuario: User = JSON.parse(localStorage.getItem('sesionUsuario') || '{}');
+        let currentPassword = sesionUsuario.password;
+    
+        if (!formData.password) {
+          formData.password = currentPassword;
         }
-
-        await this.userService.updateUser(sesionUsuario.id, updatedUserData);
-
-           // Verificar que updatedUserData.correo y updatedUserData.password no sean undefined
-      if (updatedUserData.password !== currentPassword && updatedUserData.correo && updatedUserData.password) {
-        await this.userService.updatePassword(updatedUserData.correo, updatedUserData.password);
-      }
-
-        localStorage.setItem('sesionUsuario', JSON.stringify({ ...sesionUsuario, ...updatedUserData }));
-        this.mensajeExito = 'Datos actualizados con éxito.';
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 4000);
-      } catch (error) {
-        console.error('Error actualizando usuario:', error);
+        delete formData.confirmPassword;
+    
+        this.userService.updateUser(sesionUsuario.id, formData).subscribe({
+          next: (response: any) => { // Aquí usas 'any' para la respuesta
+            this.mensajeExito = response.message; // Accedes a 'message'
+            setTimeout(() => {
+              this.router.navigate(['/home']);
+            }, 4000);
+          },
+          error: (error) => {
+            console.error('Error actualizando el perfil: ', error);
+          }
+        });
       }
     }
-  }
 
   /**
    * Método para limpiar el formulario de registro, restableciendo todos los campos a su estado inicial.

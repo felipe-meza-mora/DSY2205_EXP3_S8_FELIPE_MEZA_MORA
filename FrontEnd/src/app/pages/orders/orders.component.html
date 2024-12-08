@@ -9,25 +9,25 @@
           
           <!-- Cabecera de la tarjeta con el nombre del cliente -->
           <div class="card-header">
-            Pedido de {{ pedido.nombre }}
+            Pedido de {{ pedido.usuario.nombre }}
           </div>
 
           <div class="card-body">
             <!-- Información general del pedido -->
             <h5 class="card-title">Información del Pedido</h5>
-            <p class="card-text"><strong>Dirección:</strong> {{ pedido.direccion }}</p>
-            <p class="card-text"><strong>Correo:</strong> {{ pedido.correo }}</p>
-            <p class="card-text"><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
+            <p class="card-text"><strong>Dirección:</strong> {{ pedido.usuario.direccionEnvio }}</p>
+            <p class="card-text"><strong>Correo:</strong> {{ pedido.usuario.correo }}</p>
+            <p class="card-text"><strong>Teléfono:</strong> {{ pedido.usuario.telefono }}</p>
             <p class="card-text"><strong>Total:</strong> {{ pedido.total | currency:'':'symbol':'1.0-0' }}</p>
             <p class="card-text"><strong>Estado:</strong> {{ pedido.estado }}</p>
             
             <!-- Detalles de los productos del pedido -->
             <h5 class="card-title">Detalle del Pedido</h5>
             <ul class="list-group">
-              <li class="list-group-item" *ngFor="let item of pedido.detalle">
+              <li class="list-group-item">
                 <!-- Muestra la imagen del producto y su detalle -->
-                <img [src]="item.img" class="img-thumbnail" style="width: 50px; height: auto;" alt="{{ item.producto }}">
-                {{ item.producto }} - {{ item.cantidad }} x {{ item.precio | currency:'':'symbol':'1.0-0' }} = {{ item.subtotal | currency:'':'symbol':'1.0-0' }}
+                <img [src]="pedido.producto.imagen" class="img-thumbnail" style="width: 50px; height: auto;" alt="{{ pedido.producto.nombre }}">
+                {{ pedido.producto.nombre }} - {{ pedido.cantidad }} x {{ pedido.producto.precio | currency:'':'symbol':'1.0-0' }} = {{ pedido.producto.precio * pedido.cantidad | currency:'':'symbol':'1.0-0' }}
               </li>
             </ul>
           </div>

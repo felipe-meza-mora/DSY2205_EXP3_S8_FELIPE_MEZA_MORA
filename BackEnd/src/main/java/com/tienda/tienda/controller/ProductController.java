@@ -24,9 +24,12 @@ public class ProductController {
 
     // Endpoint para agregar un producto
     @PostMapping("/add")
-    public ResponseEntity<String> addProduct(@Valid @RequestBody Product product) {
+    public ResponseEntity<Map<String, Object>> addProduct(@Valid @RequestBody Product product) {
         Product savedProduct = productService.saveProduct(product);
-        return ResponseEntity.ok("Producto añadido correctamente: " + savedProduct.getNombre());
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Producto añadido correctamente");
+        response.put("product", savedProduct);
+        return ResponseEntity.ok(response);
     }
 
     // Endpoint para obtener un producto por ID
@@ -77,13 +80,16 @@ public class ProductController {
 
     // Endpoint para eliminar un producto
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable Long id) {
         Optional<Product> product = productService.getProductById(id);
+        Map<String, String> response = new HashMap<>();
         if (product.isPresent()) {
             productService.deleteProduct(id);
-            return ResponseEntity.ok("Producto eliminado correctamente: " + product.get().getNombre());
+            response.put("message", "Producto eliminado correctamente: " + product.get().getNombre());
+            return ResponseEntity.ok(response); // Devuelve una respuesta JSON con un mensaje
         } else {
-            return ResponseEntity.status(404).body("Producto no encontrado para eliminar");
+            response.put("message", "Producto no encontrado para eliminar");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); // Respuesta con 404 y mensaje
         }
     }
 }

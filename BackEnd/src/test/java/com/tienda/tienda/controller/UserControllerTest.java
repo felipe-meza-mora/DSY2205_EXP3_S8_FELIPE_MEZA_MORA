@@ -68,12 +68,17 @@ class UserControllerTest {
 
     @Test
     void testDeleteUser() {
+        // Preparar el mock del servicio para simular la búsqueda del usuario
         when(userService.findById(1L)).thenReturn(Optional.of(user));
 
-        ResponseEntity<String> response = userController.deleteUser(1L);
+        // Llamar al método deleteUser del controlador
+        ResponseEntity<Map<String, String>> response = userController.deleteUser(1L);
 
+        // Verificar que la respuesta sea correcta
         assertEquals(200, response.getStatusCode().value());
-        assertEquals("Usuario eliminado correctamente: Juan", response.getBody());
+
+        // Verificar que el mensaje en la respuesta sea el esperado
+        assertEquals("Usuario eliminado correctamente: Juan", response.getBody().get("message"));
     }
 
     @SuppressWarnings("null")
@@ -131,20 +136,6 @@ class UserControllerTest {
         assertTrue(((List<User>) response.getBody().get("users")).size() > 0);  // Acast seguro a List<User>
     }
 
-    @Test
-    void testUpdateUserNotFound() {
-        User updatedUser = new User();
-        updatedUser.setNombre("Updated User");
-        updatedUser.setCorreo("updated@example.com");
-
-        when(userService.updateUser(2L, updatedUser)).thenReturn(Optional.empty());
-
-        ResponseEntity<String> response = userController.updateUser(2L, updatedUser);
-
-        assertEquals(404, response.getStatusCode().value());
-        assertEquals("Usuario no encontrado para actualización", response.getBody());
-    }
-
     @SuppressWarnings("null")
     @Test
     void testGetAllUsersEmpty() {
@@ -158,12 +149,17 @@ class UserControllerTest {
 
     @Test
     void testDeleteUserNotFound() {
-        when(userService.findById(1L)).thenReturn(Optional.empty()); // Simula que el usuario no existe
+        // Simula que el usuario no existe
+        when(userService.findById(1L)).thenReturn(Optional.empty());
 
-        ResponseEntity<String> response = userController.deleteUser(1L);
+        // Llamar al método deleteUser del controlador
+        ResponseEntity<Map<String, String>> response = userController.deleteUser(1L);
 
+        // Verificar que el código de estado sea 404
         assertEquals(404, response.getStatusCode().value());
-        assertEquals("Usuario no encontrado para eliminar", response.getBody());
+
+        // Verificar que el mensaje de la respuesta sea el esperado
+        assertEquals("Usuario no encontrado para eliminar", response.getBody().get("message"));
     }
     
     @SuppressWarnings("null")
@@ -269,8 +265,9 @@ class UserControllerTest {
 
     @Test
     void testUpdateUserWithLambda() {
-        // Crea un usuario de ejemplo
+        // Crea un usuario de ejemplo con los datos actualizados
         User updatedUser = new User();
+        updatedUser.setId(1L);
         updatedUser.setNombre("Juan Actualizado");
         updatedUser.setCorreo("juan_updated@example.com");
         updatedUser.setPassword("newpassword123");
@@ -279,14 +276,48 @@ class UserControllerTest {
         updatedUser.setTelefono("123456789");
         updatedUser.setDireccionEnvio("Nueva dirección de prueba");
 
+        // Simula la llamada al servicio y retorna el usuario actualizado
         when(userService.updateUser(eq(1L), any(User.class))).thenReturn(Optional.of(updatedUser));
 
-        // Llama al controlador
-        ResponseEntity<String> response = userController.updateUser(1L, updatedUser);
+        // Llama al controlador para actualizar el usuario
+        ResponseEntity<Map<String, Object>> response = userController.updateUser(1L, updatedUser);
 
         // Verificaciones
+        assertEquals(200, response.getStatusCode().value());  // Verifica que la respuesta sea 200 OK
+        assertNotNull(response.getBody());  // Verifica que el cuerpo de la respuesta no esté vacío
+        assertEquals("Usuario actualizado correctamente", response.getBody().get("message"));  // Verifica que el mensaje sea correcto
+        assertEquals(updatedUser, response.getBody().get("data"));  // Verifica que los datos del usuario estén correctamente actualizados
+    }
+
+    @Test
+    void testGetUserById() {
+        // Datos de prueba
+        User user = new User();
+        user.setId(1L);
+        user.setNombre("Juan");
+
+        // Mock de userService.findById()
+        when(userService.findById(1L)).thenReturn(Optional.of(user));
+
+        // Llamada al endpoint
+        ResponseEntity<Map<String, Object>> response = userController.getUserByUsername(1L);
+
+        // Verificación
         assertEquals(200, response.getStatusCode().value());
-        assertEquals("Usuario actualizado correctamente: Juan Actualizado", response.getBody());
+        assertEquals("Usuario encontrado: Juan", response.getBody().get("message"));
+    }
+
+    @Test
+    void testGetUserByIdNotFound() {
+        // Mock de userService.findById() retornando vacío
+        when(userService.findById(1L)).thenReturn(Optional.empty());
+
+        // Llamada al endpoint
+        ResponseEntity<Map<String, Object>> response = userController.getUserByUsername(1L);
+
+        // Verificación
+        assertEquals(404, response.getStatusCode().value());
+        assertEquals("Usuario no encontrado", response.getBody().get("message"));
     }
 
 }

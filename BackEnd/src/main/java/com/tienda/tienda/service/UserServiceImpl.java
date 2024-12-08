@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
-
+    
     // Método para eliminar un usuario
     @Override
     public void deleteUser(Long id) {

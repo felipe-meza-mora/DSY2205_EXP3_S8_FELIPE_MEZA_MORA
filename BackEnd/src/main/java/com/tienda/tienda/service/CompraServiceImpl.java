@@ -48,6 +48,12 @@ public class CompraServiceImpl implements CompraService {
             if (updatedCompra.getFechaCompra() != null) {
                 compra.setFechaCompra(updatedCompra.getFechaCompra());
             }
+            if (updatedCompra.getTotal() != null) {
+                compra.setTotal(updatedCompra.getTotal());
+            }
+            if (updatedCompra.getEstado() != null) {
+                compra.setEstado(updatedCompra.getEstado());
+            }
             return Optional.of(compraRepository.save(compra));
         }
         return Optional.empty();

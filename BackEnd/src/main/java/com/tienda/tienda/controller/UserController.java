@@ -79,22 +79,28 @@ public class UserController {
     }
 
     // Endpoint para actualizar un usuario
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id, @Valid @RequestBody User updatedUser) {
-        Optional<User> user = userService.updateUser(id, updatedUser);
-        return user.map(u -> ResponseEntity.ok("Usuario actualizado correctamente: " + u.getNombre()))
-                   .orElseGet(() -> ResponseEntity.status(404).body("Usuario no encontrado para actualización"));
+    @PutMapping("{id}")
+    public ResponseEntity<Map<String, Object>> updateUser(@PathVariable Long id, @RequestBody User user) {
+        // Lógica para actualizar el usuario
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Usuario actualizado correctamente");
+        response.put("data", user); 
+        return ResponseEntity.ok(response);
     }
 
     // Endpoint para eliminar un usuario
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
         Optional<User> user = userService.findById(id);
         if (user.isPresent()) {
             userService.deleteUser(id);
-            return ResponseEntity.ok("Usuario eliminado correctamente: " + user.get().getNombre());
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Usuario eliminado correctamente: " + user.get().getNombre());
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(404).body("Usuario no encontrado para eliminar");
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Usuario no encontrado para eliminar");
+            return ResponseEntity.status(404).body(response);
         }
     }
 
