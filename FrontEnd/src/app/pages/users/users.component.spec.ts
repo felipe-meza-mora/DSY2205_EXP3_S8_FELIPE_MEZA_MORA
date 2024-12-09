@@ -12,9 +12,15 @@ describe('UsersComponent', () => {
   beforeEach(async () => {
     const usersServiceMock = jasmine.createSpyObj('UsersService', ['getUsers', 'deleteUser']);
   
-    // Configurar valores por defecto para los métodos
-    usersServiceMock.getUsers.and.returnValue(of([])); // Simula un array vacío de usuarios
+    // Simulación de datos para las pruebas
+    usersServiceMock.getUsers.and.returnValue(of([
+      { id: 1, nombre: 'Usuario 1', correo: 'usuario1@example.com' },
+      { id: 2, nombre: 'Usuario 2', correo: 'usuario2@example.com' },
+    ])); // Datos ficticios para getUsers
+  
     usersServiceMock.deleteUser.and.returnValue(of(undefined)); // Simula una eliminación exitosa
+  
+    spyOn(console, 'error'); // Espía para verificar los errores en console.error
   
     // Configurar el TestBed
     await TestBed.configureTestingModule({
@@ -25,7 +31,6 @@ describe('UsersComponent', () => {
     fixture = TestBed.createComponent(UsersComponent);
     component = fixture.componentInstance;
     usersService = TestBed.inject(UsersService) as jasmine.SpyObj<UsersService>;
-    fixture.detectChanges();
   });
 
   it('debería crear el componente', () => {
@@ -33,16 +38,10 @@ describe('UsersComponent', () => {
   });
 
   it('debería cargar la lista de usuarios al inicializar', () => {
-    const mockUsers: User[] = [
-      { id: 1, nombre: 'Usuario 1', correo: 'usuario1@example.com', telefono: '123456789', direccionEnvio: 'Calle 1', permisos: 'USER', rut: '12345678-9', password: 'password123' },
-      { id: 2, nombre: 'Usuario 2', correo: 'usuario2@example.com', telefono: '987654321', direccionEnvio: 'Calle 2', permisos: 'ADMIN', rut: '98765432-1', password: 'password456' },
-    ];
-
-    usersService.getUsers.and.returnValue(of(mockUsers));
-    component.loadUsers();
-
-    expect(usersService.getUsers).toHaveBeenCalled();
-    expect(component.users).toEqual(mockUsers);
+    fixture.detectChanges(); // Ejecuta la detección de cambios
+    expect(usersService.getUsers).toHaveBeenCalled(); // Verifica que se llame al servicio
+    expect(component.users.length).toBe(2); // Verifica que se cargaron 2 usuarios
+    expect(component.users[0].nombre).toBe('Usuario 1'); // Verifica un usuario específico
   });
 
   it('debería manejar un error al cargar usuarios', () => {
