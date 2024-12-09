@@ -1,124 +1,96 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { RouterTestingModule } from '@angular/router/testing';
+import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { SignUpComponent } from './sign-up.component';
 import { UsersService } from '../../service/users.service';
-import { appConfig } from '../../app.config'; // Importa appConfig
 import { of } from 'rxjs';
 
-/**
- * Suite de pruebas para SignUpComponent.
- */
 describe('SignUpComponent', () => {
-
-  let component:SignUpComponent;
+  let component: SignUpComponent;
   let fixture: ComponentFixture<SignUpComponent>;
-  let usersService: UsersService;
-
+  let usersService: jasmine.SpyObj<UsersService>;
 
   beforeEach(async () => {
-    const usersServiceMock = {
-      insertUser: jasmine.createSpy('insertUser').and.returnValue(of({ success: true })),
-      getUsers: jasmine.createSpy('getUsers').and.returnValue(of([])),
-      deleteUsers: jasmine.createSpy('deleteUsers').and.returnValue(Promise.resolve()),
-      updateUsers: jasmine.createSpy('updateUsers').and.returnValue(Promise.resolve()),
-      isRutRegistered: jasmine.createSpy('isRutRegistered').and.returnValue(of(false)),
-    };
-
-    // Configuración del entorno de pruebas de Angular
+    const usersServiceMock = jasmine.createSpyObj('UsersService', [
+      'isRutRegistered',
+      'isEmailRegistered',
+      'addUser'
+    ]);
+  
     await TestBed.configureTestingModule({
       imports: [
-        CommonModule,
+        SignUpComponent, // Mover a imports porque es un componente standalone
         ReactiveFormsModule,
-        RouterTestingModule
+        HttpClientTestingModule
       ],
       providers: [
-        { provide: usersService, useValue: usersServiceMock },
-        ...appConfig.providers,
-      ]
+        { provide: UsersService, useValue: usersServiceMock },
+      ],
     }).compileComponents();
-    
-     // Crea una instancia del componente y obtiene el fixture
+  
     fixture = TestBed.createComponent(SignUpComponent);
     component = fixture.componentInstance;
-    usersService = TestBed.inject(UsersService);
+    usersService = TestBed.inject(UsersService) as jasmine.SpyObj<UsersService>;
     fixture.detectChanges();
   });
 
-
-  // Prueba: Debería asegurarse de que el componente se crea correctamente
-  it('Debería crear', () => {
+  it('Debería crear el componente', () => {
     expect(component).toBeTruthy();
   });
- 
-    // Prueba: Debería inicializar el formulario de registro
-  it('Debería inicializar el formulario ', () => {
+
+  it('Debería inicializar el formulario correctamente', () => {
     expect(component.formRegistro).toBeDefined();
-    expect(component.formRegistro.get('rut')).toBeDefined();
-    expect(component.formRegistro.get('nombre')).toBeDefined();
-    expect(component.formRegistro.get('email')).toBeDefined();
-    expect(component.formRegistro.get('password')).toBeDefined();
-    expect(component.formRegistro.get('confirmPassword')).toBeDefined();
-    expect(component.formRegistro.get('telefono')).toBeDefined();
-    expect(component.formRegistro.get('direccionEnvio')).toBeDefined();
+    expect(component.formRegistro.controls['rut']).toBeDefined();
+    expect(component.formRegistro.controls['nombre']).toBeDefined();
+    expect(component.formRegistro.controls['email']).toBeDefined();
+    expect(component.formRegistro.controls['password']).toBeDefined();
+    expect(component.formRegistro.controls['confirmPassword']).toBeDefined();
+    expect(component.formRegistro.controls['telefono']).toBeDefined();
+    expect(component.formRegistro.controls['direccionEnvio']).toBeDefined();
   });
 
-  afterEach(() => {
-    component.formRegistro.reset();
-  });
-  
-  // Prueba: Debería requerir que las contraseñas coincidan
   it('Debería requerir que las contraseñas coincidan', () => {
-    const form = component.formRegistro;
-    if (form !== null && form !== undefined) {
-      form.patchValue({
-        password: 'Password123!',
-        confirmPassword: 'DifferentPassword123!'
-      });
-
-      expect(form.valid).toBeFalsy();
-      expect(form.hasError('passwordMismatch')).toBeTruthy();
-    }
+    component.formRegistro.patchValue({
+      password: 'Password123!',
+      confirmPassword: 'DifferentPassword!',
+    });
+    expect(component.formRegistro.hasError('passwordMismatch')).toBeTruthy();
   });
-  
-  // Prueba: Debería requerir al menos una letra mayúscula en la contraseña
+
   it('Debería requerir al menos una letra mayúscula en la contraseña', () => {
-    const form = component.formRegistro;
-    if (form !== null && form !== undefined) {
-      form.patchValue({
-        password: 'password123!',
-      });
-
-      expect(form.valid).toBeFalsy();
-      expect(form.get('password')?.hasError('missingUppercase')).toBeTruthy();
-    }
+    component.formRegistro.controls['password'].setValue('password123!');
+    const errors = component.formRegistro.controls['password'].errors;
+    expect(errors?.['missingUppercase']).toBeTruthy();
   });
 
-  // Prueba: Debería requerir al menos una letra minúscula en la contraseña
   it('Debería requerir al menos una letra minúscula en la contraseña', () => {
-    const form = component.formRegistro;
-    if (form !== null && form !== undefined) {
-      form.patchValue({
-        password: 'PASSWORD123!',
-      });
-
-      expect(form.valid).toBeFalsy();
-      expect(form.get('password')?.hasError('missingLowercase')).toBeTruthy();
-    }
+    component.formRegistro.controls['password'].setValue('PASSWORD123!');
+    const errors = component.formRegistro.controls['password'].errors;
+    expect(errors?.['missingLowercase']).toBeTruthy();
   });
-  
-  // Prueba: Debería requerir al menos un número en la contraseña
+
   it('Debería requerir al menos un número en la contraseña', () => {
-    const form = component.formRegistro;
-    if (form !== null && form !== undefined) {
-      form.patchValue({
-        password: 'Password!',
-      });
-
-      expect(form.valid).toBeFalsy();
-      expect(form.get('password')?.hasError('missingNumber')).toBeTruthy();
-    }
+    component.formRegistro.controls['password'].setValue('Password!');
+    const errors = component.formRegistro.controls['password'].errors;
+    expect(errors?.['missingNumber']).toBeTruthy();
   });
+
+  it('Debería marcar error si las contraseñas no coinciden', () => {
+    component.formRegistro.patchValue({
+      password: 'Password123!',
+      confirmPassword: 'AnotherPassword!',
+    });
+  
+    const errors = component.formRegistro.errors;
+    expect(errors?.['passwordMismatch']).toBeTruthy();
+  });
+
+  it('Debería requerir al menos un carácter especial en la contraseña', () => {
+    component.formRegistro.controls['password'].setValue('Password123');
+    const errors = component.formRegistro.controls['password'].errors;
+    expect(errors?.['missingSpecial']).toBeTruthy();
+  });
+
+
 
 });

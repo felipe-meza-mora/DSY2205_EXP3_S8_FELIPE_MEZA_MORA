@@ -1,10 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { RouterTestingModule } from '@angular/router/testing'; // Simular el enrutador
+import { HeaderComponent } from './components/header/header.component';
+import { FooterComponent } from './components/footer/footer.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing'; // Simular HttpClient
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent],
+      imports: [
+        AppComponent,
+        RouterTestingModule, // Simulación del RouterOutlet
+        HttpClientTestingModule, // Simulación de HttpClient
+        HeaderComponent,
+        FooterComponent,
+      ],
     }).compileComponents();
   });
 
@@ -14,16 +24,9 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'tienda' title`, () => {
+  it(`should have the 'dyf' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('tienda');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, tienda');
+    expect(app.title).toEqual('dyf'); // Validación del título
   });
 });

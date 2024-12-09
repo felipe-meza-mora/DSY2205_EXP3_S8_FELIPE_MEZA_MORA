@@ -365,4 +365,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       console.error('Producto seleccionado no tiene un ID válido');
     }
   }
+
+  
 }

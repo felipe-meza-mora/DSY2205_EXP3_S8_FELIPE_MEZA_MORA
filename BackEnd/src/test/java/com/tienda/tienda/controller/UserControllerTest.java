@@ -146,7 +146,8 @@ class UserControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertEquals("Se han encontrado 0 usuarios.", response.getBody().get("message"));
     }
-
+    
+    @SuppressWarnings("null")
     @Test
     void testDeleteUserNotFound() {
         // Simula que el usuario no existe
@@ -262,7 +263,8 @@ class UserControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertEquals("Usuario añadido correctamente: Juan", response.getBody().get("message"));
     }
-
+   
+    @SuppressWarnings("null")
     @Test
     void testUpdateUserWithLambda() {
         // Crea un usuario de ejemplo con los datos actualizados
@@ -288,7 +290,8 @@ class UserControllerTest {
         assertEquals("Usuario actualizado correctamente", response.getBody().get("message"));  // Verifica que el mensaje sea correcto
         assertEquals(updatedUser, response.getBody().get("data"));  // Verifica que los datos del usuario estén correctamente actualizados
     }
-
+    
+    @SuppressWarnings("null")
     @Test
     void testGetUserById() {
         // Datos de prueba
@@ -306,7 +309,8 @@ class UserControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertEquals("Usuario encontrado: Juan", response.getBody().get("message"));
     }
-
+    
+    @SuppressWarnings("null")
     @Test
     void testGetUserByIdNotFound() {
         // Mock de userService.findById() retornando vacío
